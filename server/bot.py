@@ -5,6 +5,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "conf.settings")
 django.setup()
 
 from stats.models import User, Channel, Server, Member, Message, MessageGrid
+from conf.settings import DISCORD_TOKEN
 
 import discord
 
@@ -142,7 +143,7 @@ class MyClient(discord.Client):
 
 def run():
     client = MyClient()
-    client.run('NzA1MTM3ODg2NDQ5NzYyMzM0.XqxMKA.7XBJTOdAvI6ZyuxUBoNdQt51i8A')
+    client.run(DISCORD_TOKEN)
 
 if __name__ == '__main__':
     run()
