@@ -15,6 +15,9 @@ from django.db.models import Sum
 
 from . import db_funcs
 
+def output_date(d):
+    return {'date': d, 'date_text': arrow.get(d).humanize()}
+
 def server_stats(server):
     """
    	member count
@@ -41,9 +44,9 @@ def server_stats(server):
         'members_joined_per_day_avg': members_count / days_since,
         'channel_count': server.channels.count(),
 
-        'members_joined_last_24h': server.members.filter(joined_at__gte = arrow.now().shift(days=-1).datetime).count(),
-        'messages_last_hour': Message.objects.filter(channel__server=server, created_at__gte = arrow.now().shift(hours=-1).datetime).count(),
-        'last_message': Message.objects.filter(channel__server=server).order_by('-created_at')[0].created_at,
+        'members_joined_last_24h': server.members.filter(joined_at__gte = arrow.utcnow().shift(days=-1).datetime).count(),
+        'messages_last_hour': Message.objects.filter(channel__server=server, created_at__gte = arrow.utcnow().shift(hours=-1).datetime).count(),
+        'last_message': output_date(Message.objects.filter(channel__server=server).order_by('-created_at')[0].created_at),
 
         'mph_by_dow': db_funcs.get_server_mph_by_dow(server),
         'mph_by_hod': db_funcs.get_server_mph_by_hod(server),
@@ -65,7 +68,7 @@ def channel_stats(channel):
         'name': channel.name,
         'total_messages': total_messages,
 
-        'messages_last_hour': Message.objects.filter(channel=channel, created_at__gte = arrow.now().shift(hours=-1).datetime).count(),
+        'messages_last_hour': Message.objects.filter(channel=channel, created_at__gte = arrow.utcnow().shift(hours=-1).datetime).count(),
 
         'mph_by_dow': db_funcs.get_server_mph_by_dow(channel),
         'mph_by_hod': db_funcs.get_server_mph_by_hod(channel),

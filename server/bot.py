@@ -35,6 +35,10 @@ def get_channel(disc_channel, server):
     return channel
 
 
+import arrow
+def import_date(d):
+    return arrow.get(d, 'UTC').datetime
+
 def get_message(message):
     try:
         return Message.objects.get(disc_id=message.id)
@@ -45,7 +49,7 @@ def get_message(message):
             disc_id=message.id,
             author = get_user(message.author),
             channel = get_channel(message.channel, server),
-            created_at = message.created_at.astimezone(),
+            created_at = import_date(message.created_at),
         )
         m.save()
         return m
@@ -56,7 +60,7 @@ def get_member(member):
 
     m, _ = Member.objects.get_or_create(
             user=user, server=server,
-            defaults={ 'joined_at': member.joined_at.astimezone() }
+            defaults={ 'joined_at': import_date(member.joined_at) }
         )
     return m
 
@@ -82,6 +86,7 @@ def get_all_channels_and_users(cli):
             member = get_member(m)
 
 async def get_all_messages(cli):
+    print("Getting all message history")
     for g in cli.guilds:
         for c in tqdm(g.text_channels):
             try:
@@ -114,8 +119,8 @@ class MyClient(discord.Client):
         print(self.user.name)
         print(self.user.id)
 
-        # await get_all_channels_and_users(self)
-        # await get_all_messages(self)
+        await get_all_channels_and_users(self)
+        await get_all_messages(self)
 
         await print_db_stats()
 
@@ -123,10 +128,6 @@ class MyClient(discord.Client):
 
     async def on_member_join(self, member):
         print("New member:", member)
-        # guild = member.guild
-        # if guild.system_channel is not None:
-        #     to_send = 'Welcome {0.mention} to {1.name}!'.format(member, guild)
-        #     await guild.system_channel.send(to_send)
 
         print(await new_member(member))
 
