@@ -36,7 +36,7 @@ def server_stats(server):
     days_since = (arrow.now() - first_joined).days
 
     return {
-        'id': server.disc_id,
+        'id': str(server.disc_id),
         'name': server.name,
         'total_members': members_count,
         'total_messages': Message.objects.filter(channel__server=server).count(),
@@ -64,11 +64,12 @@ def channel_stats(channel):
         return None
 
     return {
-        'id': channel.disc_id,
+        'id': str(channel.disc_id),
         'name': channel.name,
         'total_messages': total_messages,
 
         'messages_last_hour': Message.objects.filter(channel=channel, created_at__gte = arrow.utcnow().shift(hours=-1).datetime).count(),
+        'last_message': output_date(Message.objects.filter(channel=channel).order_by('-created_at')[0].created_at),
 
         'mph_by_dow': db_funcs.get_server_mph_by_dow(channel),
         'mph_by_hod': db_funcs.get_server_mph_by_hod(channel),
