@@ -26,7 +26,7 @@ SECRET_KEY = '#h)b1cclv7xckxaxgi^9om)2@fmw_w6v-q%+@@nwubuc7m)6@g'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "portal-django-env.eba-iqsgiae8.us-west-2.elasticbeanstalk.com"
+    "https://portal-radar-server.herokuapp.com/"
 ]
 
 
