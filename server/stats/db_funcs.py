@@ -27,7 +27,7 @@ def get_server_mph_by_dow(server):
     "Get messages-per-hour by day-of-week"
     with connection.cursor() as cursor:
         cursor.execute("""
-        SELECT [day_of_week], avg([count])
+        SELECT [day_of_week]+1, avg([count])
         FROM [stats_messagegrid] m
         JOIN [stats_channel] c ON m.channel_id = c.disc_id
         GROUP BY [day_of_week]
@@ -52,7 +52,7 @@ def get_channel_mph_by_dow(channel):
     "Get messages-per-hour by day-of-week"
     with connection.cursor() as cursor:
         cursor.execute("""
-        SELECT [day_of_week], avg([count])
+        SELECT [day_of_week]+1, avg([count])
         FROM [stats_messagegrid] m
         WHERE m.channel_id = %s
         """, [channel.disc_id])
