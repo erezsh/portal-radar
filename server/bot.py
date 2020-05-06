@@ -85,7 +85,8 @@ def get_all_channels_and_users(cli):
         for m in tqdm(g.members):
             member = get_member(m)
 
-async def get_all_messages(cli):
+@sync_to_async
+def get_all_messages(cli):
     print("Getting all message history")
     for g in cli.guilds:
         for c in tqdm(g.text_channels):
