@@ -21,7 +21,7 @@ def apply_kw_with_defaults(field, **defaults):
         return field(*args, **d)
     return _closure
 
-String = apply_kw_with_defaults(models.CharField, max_length=255, blank=True, null=False)
+String = apply_kw_with_defaults(models.CharField, max_length=255, blank=False, null=False)
 Int = apply_kw_with_defaults(models.IntegerField, null=False, blank=True)
 Int0 = apply_kw_with_defaults(models.IntegerField, null=False, blank=True, default=0)
 BigInt = apply_kw_with_defaults(models.BigIntegerField, null=False, blank=True)
@@ -35,25 +35,25 @@ M2M = apply_kw_with_defaults(models.ManyToManyField, blank=True)
 
 
 class User(Model):
-    disc_id = Int(primary_key=True)
+    disc_id = String(primary_key=True)
     name = String()
 
 class Server(Model):
     "Aka guild"
 
-    disc_id = Int(primary_key=True)
+    disc_id = String(primary_key=True)
     name = String()
 
     member_count = Int0()
 
 class Channel(Model):
-    disc_id = Int(primary_key=True)
+    disc_id = String(primary_key=True)
     server = ForeignKey(Server, related_name='channels')
 
     name = String()
 
 class Message(Model):
-    disc_id = Int(primary_key=True)
+    disc_id = String(primary_key=True)
     author = ForeignKey(User, related_name='messages')
     channel = ForeignKey(Channel, related_name='messages')
     created_at = Date()

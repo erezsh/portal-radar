@@ -30,8 +30,8 @@ def get_server_mph_by_dow(server):
         SELECT [day_of_week]+1, avg([count])
         FROM [stats_messagegrid] m
         JOIN [stats_channel] c ON m.channel_id = c.disc_id
+        WHERE c.server_id = %s
         GROUP BY [day_of_week]
-        HAVING c.server_id = %s
         """, [server.disc_id])
         return dict(cursor.fetchall())
 
@@ -43,8 +43,8 @@ def get_server_mph_by_hod(server):
         SELECT [hour], avg([count])
         FROM [stats_messagegrid] m
         JOIN [stats_channel] c ON m.channel_id = c.disc_id
+        WHERE c.server_id = %s
         GROUP BY [hour]
-        HAVING c.server_id = %s
         """, [server.disc_id])
         return dict(cursor.fetchall())
 
@@ -53,8 +53,9 @@ def get_channel_mph_by_dow(channel):
     with connection.cursor() as cursor:
         cursor.execute("""
         SELECT [day_of_week]+1, avg([count])
-        FROM [stats_messagegrid] m
-        WHERE m.channel_id = %s
+        FROM [stats_messagegrid]
+        WHERE channel_id = %s
+        GROUP BY [day_of_week]
         """, [channel.disc_id])
         return dict(cursor.fetchall())
 
@@ -64,7 +65,8 @@ def get_channel_mph_by_hod(channel):
     with connection.cursor() as cursor:
         cursor.execute("""
         SELECT [hour], avg([count])
-        FROM [stats_messagegrid] m
-        WHERE m.channel_id = %s
+        FROM [stats_messagegrid]
+        WHERE channel_id = %s
+        GROUP BY [hour]
         """, [channel.disc_id])
         return dict(cursor.fetchall())
