@@ -126,3 +126,7 @@ STATIC_URL = '/static/'
 DISCORD_TOKEN = None
 
 from .local_settings import *
+
+# Configure Django App for Heroku.
+import django_heroku
+django_heroku.settings(locals())

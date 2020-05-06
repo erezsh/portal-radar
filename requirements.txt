@@ -5,4 +5,4 @@ django-hug==0.1b2
 tqdm==4.46.0
 restless==2.0.3
 django-cors-headers==3.2.1
-
+django_heroku
