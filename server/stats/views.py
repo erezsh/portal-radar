@@ -71,8 +71,8 @@ def channel_stats(channel):
         'messages_last_hour': Message.objects.filter(channel=channel, created_at__gte = arrow.utcnow().shift(hours=-1).datetime).count(),
         'last_message': output_date(Message.objects.filter(channel=channel).order_by('-created_at')[0].created_at),
 
-        'mph_by_dow': db_funcs.get_server_mph_by_dow(channel),
-        'mph_by_hod': db_funcs.get_server_mph_by_hod(channel),
+        'mph_by_dow': db_funcs.get_channel_mph_by_dow(channel),
+        'mph_by_hod': db_funcs.get_channel_mph_by_hod(channel),
     }
 
 

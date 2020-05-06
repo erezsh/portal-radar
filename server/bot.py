@@ -15,21 +15,21 @@ from asgiref.sync import sync_to_async
 
 def get_server(disc_guild):
     server, _ = Server.objects.get_or_create(
-            disc_id=disc_guild.id,
+            disc_id=str(disc_guild.id),
             defaults={ 'name': disc_guild.name, }
         )
     return server
 
 def get_user(disc_user):
     user, _ = User.objects.get_or_create(
-            disc_id=disc_user.id,
+            disc_id=str(disc_user.id),
             defaults={ 'name': disc_user.name }
         )
     return user
 
 def get_channel(disc_channel, server):
     channel, _ = Channel.objects.get_or_create(
-            disc_id=disc_channel.id,
+            disc_id=str(disc_channel.id),
             defaults={ 'name': disc_channel.name, 'server': server }
         )
     return channel
@@ -41,12 +41,12 @@ def import_date(d):
 
 def get_message(message):
     try:
-        return Message.objects.get(disc_id=message.id)
+        return Message.objects.get(disc_id=str(message.id))
     except Message.DoesNotExist:
         server = get_server(message.guild),
 
         m = Message(
-            disc_id=message.id,
+            disc_id=str(message.id),
             author = get_user(message.author),
             channel = get_channel(message.channel, server),
             created_at = import_date(message.created_at),
