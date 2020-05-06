@@ -41,7 +41,6 @@ def import_date(d):
 
 def get_message(message):
     try:
-        print(Message.objects.get(disc_id=str(message.id)))
         return Message.objects.get(disc_id=str(message.id))
     except Message.DoesNotExist:
         server = get_server(message.guild),
@@ -97,6 +96,7 @@ async def get_all_messages(cli):
 
             for m in messages:
                 await new_message(m)
+            print(messages)
 
 from stats.db_funcs import update_stats
 
