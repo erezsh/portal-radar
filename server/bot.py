@@ -96,7 +96,6 @@ async def get_all_messages(cli):
 
             for m in messages:
                 await new_message(m)
-            print(messages.length)
 
 from stats.db_funcs import update_stats
 
