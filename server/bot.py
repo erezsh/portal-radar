@@ -14,6 +14,7 @@ from tqdm import tqdm
 from asgiref.sync import sync_to_async
 
 def get_server(disc_guild):
+    print("get server")
     server, _ = Server.objects.get_or_create(
             disc_id=disc_guild.id,
             defaults={ 'name': disc_guild.name, }
