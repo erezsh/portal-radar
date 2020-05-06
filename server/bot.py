@@ -40,7 +40,6 @@ def import_date(d):
     return arrow.get(d, 'UTC').datetime
 
 def get_message(message):
-    print(message)
     try:
         print(Message.objects.get(disc_id=str(message.id)))
         return Message.objects.get(disc_id=str(message.id))
