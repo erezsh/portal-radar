@@ -41,8 +41,10 @@ def import_date(d):
 
 def get_message(message):
     try:
+        print("try")
         return Message.objects.get(disc_id=str(message.id))
     except Message.DoesNotExist:
+        print("except")
         server = get_server(message.guild),
 
         m = Message(
