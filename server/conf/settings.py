@@ -140,6 +140,9 @@ if os.environ['DISCORD_TOKEN']:
 else:
     DISCORD_TOKEN = None
 
+print(os.environ)
+print(DISCORD_TOKEN)
+
 
 from .local_settings import *
 
