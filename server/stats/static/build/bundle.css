@@ -1,0 +1,8 @@
+.server_name.svelte-1hhswl0{grid-area:server;font-weight:bold;font-size:20px}.server_stats.svelte-1hhswl0{grid-area:stats}.server_growth.svelte-1hhswl0{grid-area:growth}.server_activity.svelte-1hhswl0{grid-area:activity}.server_activity_graphs.svelte-1hhswl0{grid-area:activity_graphs;display:flex}.server_channel_list.svelte-1hhswl0{grid-area:channels
+}.server_item.svelte-1hhswl0{display:grid;grid-template-columns:200px 200px 900px;grid-template-areas:"server growth   activity_graphs"
+		"stats  activity activity_graphs"
+		"channels channels channels";padding:10px;border:3px solid silver;border-radius:10px}.channel_name.svelte-1hhswl0{grid-area:name;font-weight:bold;font-size:18px}.channel_stats.svelte-1hhswl0{grid-area:stats}.channel_item.svelte-1hhswl0{display:grid;grid-template-columns:60px 300px 800px;grid-template-areas:"blank name   activity_graphs"
+		"blank stats  activity_graphs"
+	;margin-top:10px;padding:10px;background:#eee;border-bottom:1px solid silver}.sort_menu.svelte-1hhswl0{margin-top:40px}main.svelte-1hhswl0{text-align:center;padding:1em;max-width:240px;margin:0 auto}h1.svelte-1hhswl0{color:#ff3e00;text-transform:uppercase;font-size:4em;font-weight:100}@media(min-width: 640px){main.svelte-1hhswl0{max-width:none}}
+
+/*# sourceMappingURL=bundle.css.map */
