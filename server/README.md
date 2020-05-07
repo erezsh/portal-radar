@@ -6,8 +6,9 @@
 Setup:
 
 ```bash
-$ pip install requirements.pip
+$ pip install -r requirements.pip
 $ cd server
+$ python manage.py makemigrations stats
 $ python manage.py migrate
 
 $ edit "./server/conf/local_settings.py"

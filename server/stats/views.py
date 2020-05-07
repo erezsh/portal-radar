@@ -52,7 +52,7 @@ def server_stats(server):
         'mph_by_hod': db_funcs.get_server_mph_by_hod(server),
     }
 
-def channel_stats(channel):
+def channel_stats(channel, from_update):
     """
 	messages in last hour  (updates)
 	avg-messages-per-hour, for each day of the week
@@ -63,17 +63,22 @@ def channel_stats(channel):
     if total_messages == 0:
         return None
 
-    return {
+    json = {
         'id': str(channel.disc_id),
         'name': channel.name,
         'total_messages': total_messages,
 
         'messages_last_hour': Message.objects.filter(channel=channel, created_at__gte = arrow.utcnow().shift(hours=-1).datetime).count(),
         'last_message': output_date(Message.objects.filter(channel=channel).order_by('-created_at')[0].created_at),
-
-        'mph_by_dow': db_funcs.get_channel_mph_by_dow(channel),
-        'mph_by_hod': db_funcs.get_channel_mph_by_hod(channel),
     }
+
+    if not from_update:
+        json.update({
+            'mph_by_dow': db_funcs.get_channel_mph_by_dow(channel),
+            'mph_by_hod': db_funcs.get_channel_mph_by_hod(channel),
+    })
+
+    return json
 
 
 @routes.get('servers/')
@@ -82,9 +87,9 @@ def servers(request):
     return {s.disc_id: server_stats(s) for s in servers}
 
 @routes.get('channels/<server_id>/')
-def channels(request, server_id):
+def channels(request, server_id, update=False):
     server = Server.objects.get(disc_id=server_id)
     channels = server.channels.all()
 
-    stats = [channel_stats(c) for c in channels]
+    stats = [channel_stats(c, update) for c in channels]
     return {c['id']: c for c in stats if c}

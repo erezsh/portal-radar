@@ -17,16 +17,15 @@
 		return Object.values(json);
 	}
 
-	async function list_channels(server) {
-		let r = await fetch('http://127.0.0.1:8000/channels/' + server)
+	async function list_channels(server, update=false) {
+		let r = await fetch('http://127.0.0.1:8000/channels/' + server + (update?'?update=true':''))
 
 		if (!r.ok) {
 			console.log("HTTP-Error: " + r.status);
 			return {}
 		}
 
-		let json = await r.json()
-		return Object.values(json) //.splice(1, 20)
+		return await r.json()
 	}
 
 	function sort_channels(server_id, cmp) {
@@ -52,14 +51,34 @@
 		return sort_channels(server, sort_func)
 	}
 
+	async function update_channels(server_id) {
+		console.debug("Updating")
+		let c_list = channels_dict[server_id]
+		let updated_channels = await list_channels(server_id, true)
+		for (let c of c_list) {
+			c.last_message = updated_channels[c.id].last_message
+			c.messages_last_hour = updated_channels[c.id].messages_last_hour
+		}
+		server_list = server_list
+	}
+
+	async function update_channels_loop(server_id) {
+		setTimeout(async () => {
+			await update_channels(server_id)
+			update_channels_loop(server_id)
+		}, 10000);
+	}
 
 	async function get_channels(server_id) {
 		if (!(server_id in channels_dict)) {
-			let channels = await list_channels(server_id)
+			let channels = Object.values(await list_channels(server_id))
+
 			channels.sort(function(a, b){return a.name.localeCompare(b.name)})
 			channels_dict[server_id] = channels
-		}
 
+			console.log("Setting auto-update")
+			await update_channels_loop(server_id)
+		}
 		return channels_dict[server_id]
 	}
 
@@ -132,6 +151,9 @@
 						<button on:click={() => sort_channels__total_messages(s.id)}>
 							Total messages
 						</button>
+						<!-- <button on:click={() => update_channels(s.id)}>
+							Update
+						</button> -->
 					</div>
 					<ul>
 					{#each channel_list as c, i}
