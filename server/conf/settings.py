@@ -25,7 +25,7 @@ SECRET_KEY = 's(_x#lho@vuglw7ezf50*^l+u(db+pr6hbq*jxj#7c-)3y2_p+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'portal-radar.herokuapp.com']
 
 
 # Application definition
