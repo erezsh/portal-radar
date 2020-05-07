@@ -123,6 +123,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = '../stats/static'
+
 DISCORD_TOKEN = None
 
 from .local_settings import *
