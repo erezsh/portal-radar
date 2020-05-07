@@ -134,11 +134,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static")
 ]
 
-if (os.environ['DISCORD_TOKEN']) {
+if os.environ['DISCORD_TOKEN']:
     DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
-} else {
+else:
     DISCORD_TOKEN = None
-}
+
 
 from .local_settings import *
 
