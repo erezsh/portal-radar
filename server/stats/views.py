@@ -9,9 +9,7 @@ routes = django_hug.Routes()
 from stats.models import User, Channel, Server, Member, Message, MessageGrid
 
 
-
 from django.db.models import Sum
-
 
 from . import db_funcs
 
@@ -97,3 +95,9 @@ def channels(request, server_id, update=False):
 
     stats = [channel_stats(c, update) for c in channels]
     return {c['id']: c for c in stats if c}
+
+
+@routes.get('/')
+def index(request):
+
+    return render(request, 'index.html')
