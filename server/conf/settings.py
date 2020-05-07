@@ -143,8 +143,6 @@ if os.environ['DISCORD_TOKEN']:
 
 from .local_settings import *
 
-print(DISCORD_TOKEN)
-
 # Configure Django App for Heroku.
 import django_heroku
 django_heroku.settings(locals())
