@@ -135,14 +135,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static")
 ]
 
+DISCORD_TOKEN = None
+
+# Grab config variable in production
 if os.environ['DISCORD_TOKEN']:
     DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
-else:
-    DISCORD_TOKEN = None
-
-print(os.environ)
-print(DISCORD_TOKEN)
-
 
 from .local_settings import *
 
