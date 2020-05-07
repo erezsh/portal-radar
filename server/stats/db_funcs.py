@@ -10,6 +10,7 @@ def update_stats():
     # XXX This query works on sqlite only!
 
     with connection.cursor() as cursor:
+        print("HI")
         print(cursor)
         cursor.execute('DELETE FROM "stats_messagegrid";')
         cursor.execute("""
