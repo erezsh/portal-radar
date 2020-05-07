@@ -1576,7 +1576,7 @@ var app = (function () {
     			attr_dev(main, "class", "svelte-1hhswl0");
     			add_location(main, file$1, 94, 0, 2491);
     			attr_dev(link, "rel", "stylesheet");
-    			attr_dev(link, "href", "uPlot/uPlot.min.css");
+    			// attr_dev(link, "href", "uPlot/uPlot.min.css");
     			add_location(link, file$1, 306, 0, 6551);
     		},
     		l: function claim(nodes) {
