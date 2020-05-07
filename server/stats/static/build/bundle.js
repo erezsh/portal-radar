@@ -3414,12 +3414,12 @@ var app = (function () {
   }
 
   function instance$1($$self, $$props, $$invalidate) {
-    let server_root = "http://portal-radar.herokuapp.com/";
+    let server_root = "https://portal-radar.herokuapp.com/";
     let server_list = [];
     let channels_dict = {};
 
     async function list_servers() {
-      let r = await fetch(server_root + "servers");
+      let r = await fetch(server_root + "servers/");
 
       if (!r.ok) {
         console.log("HTTP-Error: " + r.status);
