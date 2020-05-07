@@ -123,7 +123,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = '../stats/static'
+STATIC_ROOT = '../stats/templates/index.html'
 
 DISCORD_TOKEN = None
 
