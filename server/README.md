@@ -15,9 +15,11 @@ $ edit "./server/conf/local_settings.py" # Follow format below
 DISCORD_TOKEN = "..."
 CORS_ORIGIN_ALLOW_ALL = # True or False
 ```
+
 ```
 $ python manage.py makemigrations stats
 $ python manage.py migrate
+$ python manage.py collectstatic
 ```
 
 Run:
