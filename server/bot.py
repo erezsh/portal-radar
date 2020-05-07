@@ -8,6 +8,8 @@ django.setup()
 from stats.models import User, Channel, Server, Member, Message, MessageGrid
 from conf.settings import DISCORD_TOKEN
 
+print(DISCORD_TOKEN)
+
 import discord
 
 from tqdm import tqdm
