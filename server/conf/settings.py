@@ -25,7 +25,7 @@ SECRET_KEY = 's(_x#lho@vuglw7ezf50*^l+u(db+pr6hbq*jxj#7c-)3y2_p+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'portal-radar.herokuapp.com']
 
 
 # Application definition
@@ -79,10 +79,11 @@ WSGI_APPLICATION = 'conf.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.path.join(BASE_DIR, 'db.postgresql'),
     }
 }
+
 
 
 # Password validation
@@ -121,8 +122,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
+MIDDLEWARE_CLASSES = (
+    'whitenoise.middleware.WhiteNoiseMiddleware'
+)
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static")
+]
 
 DISCORD_TOKEN = None
 
+# Grab config variable in production
+if os.environ['DISCORD_TOKEN']:
+    DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
+
 from .local_settings import *
+
+# Configure Django App for Heroku.
+import django_heroku
+django_heroku.settings(locals())

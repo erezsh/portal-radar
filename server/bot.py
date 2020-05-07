@@ -2,6 +2,7 @@
 import os
 import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "conf.settings")
+os.environ['ASGI_THREADS']="4"
 django.setup()
 
 from stats.models import User, Channel, Server, Member, Message, MessageGrid
@@ -96,11 +97,6 @@ async def get_all_messages(cli):
 
             for m in messages:
                 await new_message(m)
-
-
-
-
-
 
 from stats.db_funcs import update_stats
 
