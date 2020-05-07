@@ -35,7 +35,8 @@ def get_server_mph_by_dow(server):
         # WHERE c.server_id = %s
         # GROUP BY [day_of_week]
         # """, [server.disc_id])
-        return dict(cursor.fetchall())
+        # return dict(cursor.fetchall())
+        return
 
 
 def get_server_mph_by_hod(server):
@@ -49,7 +50,8 @@ def get_server_mph_by_hod(server):
         # WHERE c.server_id = %s
         # GROUP BY [hour]
         # """, [server.disc_id])
-        return dict(cursor.fetchall())
+        # return dict(cursor.fetchall())
+        return
 
 def get_channel_mph_by_dow(channel):
     "Get messages-per-hour by day-of-week"
@@ -61,7 +63,8 @@ def get_channel_mph_by_dow(channel):
         # WHERE channel_id = %s
         # GROUP BY [day_of_week]
         # """, [channel.disc_id])
-        return dict(cursor.fetchall())
+        # return dict(cursor.fetchall())
+        return
 
 
 def get_channel_mph_by_hod(channel):
@@ -74,4 +77,5 @@ def get_channel_mph_by_hod(channel):
         # WHERE channel_id = %s
         # GROUP BY [hour]
         # """, [channel.disc_id])
-        return dict(cursor.fetchall())
+        # return dict(cursor.fetchall())
+        return
