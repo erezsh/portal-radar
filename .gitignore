@@ -4,4 +4,7 @@ migrations
 .DS_Store
 /client/node_modules/
 /client/public/build/
+
 /server/staticfiles
+/server/stats/__pycache__
+/server/conf/__pycache__
