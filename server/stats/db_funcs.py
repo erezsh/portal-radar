@@ -75,16 +75,16 @@ def update_stats():
     with connection.cursor() as cursor:
         cursor.execute('DELETE FROM "stats_messagegrid";')
         # WE ARE USING POSTGRESQL (SQLITE is not intended for PRODUCTION)
-        # cursor.execute("""
-        #     INSERT INTO "stats_messagegrid"(channel_id, day_of_week, hour, count)
-        #     SELECT
-        #         [channel_id],
-        #         strftime('%w', [created_at]) as [day_of_week],
-        #         strftime('%H', [created_at]) as [hour],
-        #         (CAST(count(*) AS float) / count(distinct strftime('%W', [created_at])))
-        #     FROM [stats_message]
-        #     GROUP BY [channel_id], [day_of_week], [hour];
-        # """)
+        cursor.execute("""
+            INSERT INTO "stats_messagegrid"(channel_id, day_of_week, hour, count)
+            SELECT
+                [channel_id],
+                strftime('%w', [created_at]) as [day_of_week],
+                strftime('%H', [created_at]) as [hour],
+                (CAST(count(*) AS float) / count(distinct strftime('%W', [created_at])))
+            FROM [stats_message]
+            GROUP BY [channel_id], [day_of_week], [hour];
+        """)
 
 
 def get_server_mph_by_dow(server):
