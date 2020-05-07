@@ -59,8 +59,12 @@ def channel_stats(channel, from_update):
 	messages-per-hour , for each hour of the day (24 values)
     """
 
-    total_messages = Message.objects.filter(channel=channel).count()
-    if total_messages == 0:
+    last_message = db_funcs.get_channel_last_message(channel)   # Keep this first, it refreshes the cache
+    if last_message is None:
+        return None
+
+    total_messages = db_funcs.get_channel_total_messages(channel)
+    if total_messages <= 1:
         return None
 
     json = {
@@ -68,8 +72,8 @@ def channel_stats(channel, from_update):
         'name': channel.name,
         'total_messages': total_messages,
 
-        'messages_last_hour': Message.objects.filter(channel=channel, created_at__gte = arrow.utcnow().shift(hours=-1).datetime).count(),
-        'last_message': output_date(Message.objects.filter(channel=channel).order_by('-created_at')[0].created_at),
+        'messages_last_hour': db_funcs.get_channel_messages_last_hour(channel),
+        'last_message': output_date(last_message),
     }
 
     if not from_update:

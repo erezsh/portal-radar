@@ -1,4 +1,67 @@
+from collections import defaultdict
+
+import arrow
+
 from django.db import connection
+
+from stats.models import Message
+
+from functools import wraps
+
+
+class Cache:
+    def __init__(self, f, timeout, call_with_last_value):
+        self.f = f
+        self.timeout = timeout
+        self.call_with_last_value = call_with_last_value
+
+        self.last_save = defaultdict(lambda:None)
+        self.value = {}
+
+    def __call__(self, *args):
+        last_save = self.last_save[args]
+        if last_save is None or (arrow.now() - last_save).total_seconds() > self.timeout:
+            if self.call_with_last_value:
+                fargs = (self.value.get(args, None),) + args
+            else:
+                fargs = args
+            self.value[args] = self.f(*fargs)
+            self.last_save[args] = arrow.now()
+        return self.value[args]
+
+    def invalidate(self):
+        self.last_save = defaultdict(lambda:None)
+
+
+def cache(timeout, call_with_last_value=False):
+    def dec(f):
+        return wraps(f)(Cache(f, timeout, call_with_last_value))
+    return dec
+
+
+
+@cache(30)
+def get_channel_messages_last_hour(channel):
+    return Message.objects.filter(channel=channel, created_at__gte=arrow.utcnow().shift(hours=-1).datetime).count(),
+
+@cache(30)
+def get_channel_total_messages(channel):
+    return Message.objects.filter(channel=channel).count()
+
+@cache(5, call_with_last_value=True)
+def get_channel_last_message(old_last_created, channel):
+    try:
+        last_message = Message.objects.filter(channel=channel).latest('created_at')
+    except Message.DoesNotExist:
+        return None
+    last_created = last_message.created_at
+    if last_created != old_last_created:
+        print("new message")
+        get_channel_messages_last_hour.invalidate()
+        get_channel_total_messages.invalidate()
+
+    return last_created
+
 
 def update_stats():
     # table messages_grid = MessageLog {

@@ -2,11 +2,13 @@
 	import { afterUpdate, onMount } from 'svelte';
 	import Graph from './Graph.svelte';
 
+	let server_root = 'http://127.0.0.1:8000/'
+
 	let server_list = []
 	let channels_dict = {}
 
 	async function list_servers() {
-		let r = await fetch('http://127.0.0.1:8000/servers')
+		let r = await fetch(server_root+'servers')
 
 		if (!r.ok) {
 			console.log("HTTP-Error: " + r.status);
@@ -18,7 +20,7 @@
 	}
 
 	async function list_channels(server, update=false) {
-		let r = await fetch('http://127.0.0.1:8000/channels/' + server + (update?'?update=true':''))
+		let r = await fetch(server_root+'channels/' + server + '/' + (update?'?update=true':''))
 
 		if (!r.ok) {
 			console.log("HTTP-Error: " + r.status);
