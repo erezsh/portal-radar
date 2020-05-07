@@ -2,7 +2,7 @@
 	import { afterUpdate, onMount } from 'svelte';
 	import Graph from './Graph.svelte';
 
-	let server_root = 'http://127.0.0.1:8000/'
+	let server_root = 'http://portal-radar.herokuapp.com/'
 
 	let server_list = []
 	let channels_dict = {}
