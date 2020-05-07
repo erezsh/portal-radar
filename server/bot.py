@@ -2,6 +2,7 @@
 import os
 import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "conf.settings")
+os.environ['ASGI_THREADS']="4"
 django.setup()
 
 from stats.models import User, Channel, Server, Member, Message, MessageGrid
@@ -41,10 +42,8 @@ def import_date(d):
 
 def get_message(message):
     try:
-        print("try")
         return Message.objects.get(disc_id=str(message.id))
     except Message.DoesNotExist:
-        print("except")
         server = get_server(message.guild),
 
         m = Message(
