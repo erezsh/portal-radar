@@ -1,0 +1,6 @@
+*.pyc
+*.sqlite3
+migrations
+.DS_Store
+/client/node_modules/
+/client/public/build/
