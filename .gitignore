@@ -6,6 +6,5 @@ migrations
 /client/public/build/
 
 /server/staticfiles
-/server/conf/local_settings.py
 /server/stats/__pycache__
 /server/conf/__pycache__
