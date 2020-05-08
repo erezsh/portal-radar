@@ -90,11 +90,11 @@ def update_stats():
     #     count: count(id) / count_distinct(week_of_year(date))   // aggregated values
     # }
 
-    # XXX This query works on sqlite only!
+    # TODO this has to run every hour!!
 
     with connection.cursor() as cursor:
         cursor.execute('DELETE FROM stats_messagegrid;')
-        cursor.execute(f"""
+        q = (f"""
             INSERT INTO stats_messagegrid(channel_id, day_of_week, hour, count)
             SELECT
                 channel_id,
@@ -104,10 +104,13 @@ def update_stats():
             FROM stats_message
             GROUP BY channel_id, day_of_week, hour;
         """)
+        print(q)
+        cursor.execute(q)
 
 
 def get_server_mph_by_dow(server):
     "Get messages-per-hour by day-of-week"
+    base_dict = {n:0 for n in range(1,8)}
     with connection.cursor() as cursor:
         cursor.execute("""
         SELECT day_of_week+1, avg(count)
@@ -116,11 +119,13 @@ def get_server_mph_by_dow(server):
         WHERE c.server_id = %s
         GROUP BY day_of_week
         """, [server.disc_id])
-        return dict(cursor.fetchall())
+        base_dict.update( dict(cursor.fetchall()) )
+        return base_dict
 
 
 def get_server_mph_by_hod(server):
     "Get messages-per-hour by hour of day"
+    base_dict = {n:0 for n in range(0,24)}
     with connection.cursor() as cursor:
         cursor.execute("""
         SELECT hour, avg(count)
@@ -129,10 +134,12 @@ def get_server_mph_by_hod(server):
         WHERE c.server_id = %s
         GROUP BY hour
         """, [server.disc_id])
-        return dict(cursor.fetchall())
+        base_dict.update( dict(cursor.fetchall()) )
+        return base_dict
 
 def get_channel_mph_by_dow(channel):
     "Get messages-per-hour by day-of-week"
+    base_dict = {n:0 for n in range(1,8)}
     with connection.cursor() as cursor:
         cursor.execute("""
         SELECT day_of_week+1, avg(count)
@@ -140,11 +147,13 @@ def get_channel_mph_by_dow(channel):
         WHERE channel_id = %s
         GROUP BY day_of_week
         """, [channel.disc_id])
-        return dict(cursor.fetchall())
+        base_dict.update( dict(cursor.fetchall()) )
+        return base_dict
 
 
 def get_channel_mph_by_hod(channel):
     "Get messages-per-hour by hour of day"
+    base_dict = {n:0 for n in range(0,24)}
     with connection.cursor() as cursor:
         cursor.execute("""
         SELECT hour, avg(count)
@@ -152,4 +161,5 @@ def get_channel_mph_by_hod(channel):
         WHERE channel_id = %s
         GROUP BY hour
         """, [channel.disc_id])
-        return dict(cursor.fetchall())
+        base_dict.update( dict(cursor.fetchall()) )
+        return base_dict

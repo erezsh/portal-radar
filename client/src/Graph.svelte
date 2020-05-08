@@ -10,7 +10,7 @@
 
 	let data_elem
 
-    let DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    let DAYS = [null, "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 	let created_graph = false
 
