@@ -3,12 +3,15 @@
 	import Graph from './Graph.svelte';
 
 	let server_root = '/'
+	// let server_root = 'http://127.0.0.1:8000/'
 
 	let server_list = []
 	let channels_dict = {}
 
 	let channels_loop_timeout = null;
 	let paused = false;
+
+	let show_channel_graphs = false;
 
 	async function list_servers() {
 		let r = await fetch(server_root+'servers')
@@ -22,8 +25,8 @@
 		return Object.values(json);
 	}
 
-	async function list_channels(server, update=false) {
-		let r = await fetch(server_root+'channels/' + server + '/' + (update?'?update=true':''))
+	async function list_channels(server, graph_info=false) {
+		let r = await fetch(server_root+'channels/' + server + '/' + (graph_info?'?graph_info=true':''))
 
 		if (!r.ok) {
 			console.log("HTTP-Error: " + r.status);
@@ -55,18 +58,32 @@
 		let sort_func = function(a, b){return b.total_messages-a.total_messages}
 		return sort_channels(server, sort_func)
 	}
+	function toggle_channel_graphs() {
+		show_channel_graphs = !show_channel_graphs
+		if (show_channel_graphs) {
+			update_all_channels()
+		}
+	}
 
 	async function update_channels(server_id) {
 		console.debug("updating channels..")
 		let c_list = channels_dict[server_id]
-		let updated_channels = await list_channels(server_id, true)
+		let updated_channels = await list_channels(server_id, show_channel_graphs)
 		for (let c of c_list) {
-			c.last_message = updated_channels[c.id].last_message
-			c.messages_last_hour = updated_channels[c.id].messages_last_hour
+			let new_c = updated_channels[c.id]
+			c.last_message = new_c.last_message
+			c.messages_last_hour = new_c.messages_last_hour
+			c.mph_by_hod = new_c.mph_by_hod
+			c.mph_by_dow = new_c.mph_by_dow
 		}
 		server_list = server_list
 	}
 
+	async function update_all_channels() {
+		for (let s of server_list) {
+			await update_channels(s.id)
+		}
+	}
 
 	function update_channels_loop() {
 		if (paused) {
@@ -74,9 +91,7 @@
 		}
 
 		channels_loop_timeout = setTimeout(async () => {
-			for (let s of server_list) {
-				await update_channels(s.id)
-			}
+			await update_all_channels()
 			update_channels_loop()
 		}, 1000);
 	}
@@ -95,14 +110,14 @@
 
 	async function get_channels(server_id) {
 		if (!(server_id in channels_dict)) {
-			let channels = Object.values(await list_channels(server_id))
+			let channels = Object.values(await list_channels(server_id, show_channel_graphs))
 
 			channels.sort(function(a, b){return a.name.localeCompare(b.name)})
 			channels_dict[server_id] = channels
 
 			console.log("Setting auto-update")
 			paused = false
-			update_channels_loop()
+			// update_channels_loop()
 		}
 		return channels_dict[server_id]
 	}
@@ -120,7 +135,7 @@
 	<h1>Portal Radar</h1>
 	<ul class="server_list">
 	{#each server_list as s, i}
-		<li class="server_item">
+		<li class="server_item show_graphs">
 			<div class="server_name">
 				{s.name}
 			</div>
@@ -177,13 +192,13 @@
 						<button on:click={() => sort_channels__total_messages(s.id)}>
 							Total messages
 						</button>
-						<!-- <button on:click={() => update_channels(s.id)}>
-							Update
-						</button> -->
+						<button on:click={() => toggle_channel_graphs()}>
+							Toggle Channel Graphs
+						</button>
 					</div>
 					<ul>
 					{#each channel_list as c, i}
-						<li class="channel_item">
+						<li class="channel_item {show_channel_graphs?'show_graphs':''}">
 							<div class="channel_name">
 								<a href="https://discord.com/channels/{s.id}/{c.id}" target="_blank">
 									{c.name}
@@ -238,8 +253,12 @@
 }
 .server_activity_graphs {
 	grid-area: activity_graphs;
+	display: none;
+}
+.server_item.show_graphs > .server_activity_graphs {
 	display: flex;
 }
+
 .server_channel_list {
 	grid-area: channels
 }
@@ -255,7 +274,7 @@
 
 .server_item {
 	display: grid;
-	grid-template-columns: 200px 200px 900px;
+	grid-template-columns: 200px 200px auto;
 
 	grid-template-areas:
 		"server growth   activity_graphs"
@@ -278,31 +297,48 @@
 }
 
 .channel_item {
+	float: left;
+	margin-right: 10px;
+	margin-bottom: 10px;
+
 	display: grid;
-	grid-template-columns: 60px 300px 800px;
+
+	grid-template-columns: 300px;
 
 	grid-template-areas:
-		"blank name   activity_graphs"
-		"blank stats  activity_graphs"
+		"name"
+		"stats"
 	;
 
 	margin-top: 10px;
 	padding: 10px;
 	background: #eee;
 	border-bottom: 1px solid silver;
-	/* border-radius: 10px; */
+	max-width: 1200px
+
 }
+
+.channel_item.show_graphs {
+	float: none;
+	margin-right: 0;
+	margin-bottom: 0;
+
+	grid-template-columns: 60px 300px 800px;
+
+	grid-template-areas:
+		"blank name   activity_graphs"
+		"blank stats  activity_graphs"
+	;
+}
+
+.channel_item.show_graphs > .server_activity_graphs {
+	display: flex;
+}
+
 
 .sort_menu {
 	margin-top: 40px;
 }
-
-
-
-
-
-
-
 
 
 

@@ -50,7 +50,7 @@ def server_stats(server):
         'mph_by_hod': db_funcs.get_server_mph_by_hod(server),
     }
 
-def channel_stats(channel, from_update):
+def channel_stats(channel, graph_info):
     """
 	messages in last hour  (updates)
 	avg-messages-per-hour, for each day of the week
@@ -74,7 +74,7 @@ def channel_stats(channel, from_update):
         'last_message': output_date(last_message),
     }
 
-    if not from_update:
+    if graph_info:
         json.update({
             'mph_by_dow': db_funcs.get_channel_mph_by_dow(channel),
             'mph_by_hod': db_funcs.get_channel_mph_by_hod(channel),
@@ -89,11 +89,11 @@ def servers(request):
     return {s.disc_id: server_stats(s) for s in servers}
 
 @routes.get('channels/<server_id>/')
-def channels(request, server_id, update=False):
+def channels(request, server_id, graph_info=False):
     server = Server.objects.get(disc_id=server_id)
     channels = server.channels.all()
 
-    stats = [channel_stats(c, update) for c in channels]
+    stats = [channel_stats(c, graph_info) for c in channels]
     return {c['id']: c for c in stats if c}
 
 
