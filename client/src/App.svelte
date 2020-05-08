@@ -7,6 +7,9 @@
 	let server_list = []
 	let channels_dict = {}
 
+	let channels_loop_timeout = null;
+	let paused = false;
+
 	async function list_servers() {
 		let r = await fetch(server_root+'servers')
 
@@ -54,7 +57,7 @@
 	}
 
 	async function update_channels(server_id) {
-		console.debug("Updating")
+		console.debug("updating channels..")
 		let c_list = channels_dict[server_id]
 		let updated_channels = await list_channels(server_id, true)
 		for (let c of c_list) {
@@ -64,11 +67,30 @@
 		server_list = server_list
 	}
 
-	async function update_channels_loop(server_id) {
-		setTimeout(async () => {
-			await update_channels(server_id)
-			update_channels_loop(server_id)
-		}, 10000);
+
+	function update_channels_loop() {
+		if (paused) {
+			return
+		}
+
+		channels_loop_timeout = setTimeout(async () => {
+			for (let s of server_list) {
+				await update_channels(s.id)
+			}
+			update_channels_loop()
+		}, 1000);
+	}
+
+	function handleVisibilityChange() {
+		if (document.visibilityState === 'visible') {
+			console.log("resumed")
+			paused = false
+			update_channels_loop()
+		} else {
+			paused = true
+			clearTimeout(channels_loop_timeout)
+			console.log("paused")
+		}
 	}
 
 	async function get_channels(server_id) {
@@ -79,12 +101,14 @@
 			channels_dict[server_id] = channels
 
 			console.log("Setting auto-update")
-			await update_channels_loop(server_id)
+			paused = false
+			update_channels_loop()
 		}
 		return channels_dict[server_id]
 	}
 
 	async function init() {
+		document.addEventListener("visibilitychange", handleVisibilityChange)
 		server_list = await list_servers()
 	}
 	onMount(init)
