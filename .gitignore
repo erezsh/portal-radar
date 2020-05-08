@@ -4,3 +4,4 @@ migrations
 .DS_Store
 /client/node_modules/
 /client/public/build/
+__pycache__

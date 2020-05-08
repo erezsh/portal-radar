@@ -106,6 +106,7 @@ from stats.db_funcs import update_stats
 
 @sync_to_async
 def print_db_stats():
+    print("Updating stats")
     update_stats()
     print('%d channels' % Channel.objects.count())
     print('%d members' % Member.objects.count())
