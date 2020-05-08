@@ -91,6 +91,7 @@ def update_stats():
     # }
 
     # TODO this has to run every hour!!
+    print("Updating message grid")
 
     with connection.cursor() as cursor:
         cursor.execute('DELETE FROM stats_messagegrid;')
@@ -104,7 +105,6 @@ def update_stats():
             FROM stats_message
             GROUP BY channel_id, day_of_week, hour;
         """)
-        print(q)
         cursor.execute(q)
 
 
@@ -119,7 +119,7 @@ def get_server_mph_by_dow(server):
         WHERE c.server_id = %s
         GROUP BY day_of_week
         """, [server.disc_id])
-        base_dict.update( dict(cursor.fetchall()) )
+        base_dict.update({k:float(v) for k, v in cursor.fetchall()})
         return base_dict
 
 
@@ -134,7 +134,7 @@ def get_server_mph_by_hod(server):
         WHERE c.server_id = %s
         GROUP BY hour
         """, [server.disc_id])
-        base_dict.update( dict(cursor.fetchall()) )
+        base_dict.update({k:float(v) for k, v in cursor.fetchall()})
         return base_dict
 
 def get_channel_mph_by_dow(channel):
@@ -147,7 +147,7 @@ def get_channel_mph_by_dow(channel):
         WHERE channel_id = %s
         GROUP BY day_of_week
         """, [channel.disc_id])
-        base_dict.update( dict(cursor.fetchall()) )
+        base_dict.update({k:float(v) for k, v in cursor.fetchall()})
         return base_dict
 
 
@@ -161,5 +161,5 @@ def get_channel_mph_by_hod(channel):
         WHERE channel_id = %s
         GROUP BY hour
         """, [channel.disc_id])
-        base_dict.update( dict(cursor.fetchall()) )
+        base_dict.update({k:float(v) for k, v in cursor.fetchall()})
         return base_dict
