@@ -300,8 +300,7 @@
 		"channels channels channels";
 
 	padding: 10px;
-	border: 3px solid silver;
-	border-radius: 10px;
+	border-top: 3px solid silver;
 }
 
 .channel_name {
