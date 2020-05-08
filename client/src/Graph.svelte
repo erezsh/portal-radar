@@ -70,7 +70,7 @@
 					show: true,
 					spanGaps: true,
 					label: "Messages per hour (Avg)",
-					value: (self, rawValue) => rawValue.toFixed(2),
+					value: (self, rawValue) => parseFloat(rawValue).toFixed(2),
 					width: 1,
 					stroke: "#03a9f4",
 					fill: "#b3e5fc",
