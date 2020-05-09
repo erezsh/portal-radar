@@ -9,9 +9,10 @@
 
 	let server_list = []
 	let channels_dict = {}
+	let channels_search = ''
+	let channels_sort_by = "name";
 
 	let show_channel_graphs = false;
-	let sort_channels_by = "name";
 
 	async function list_servers() {
 		let r = await fetch(server_root+'servers')
@@ -34,6 +35,17 @@
 		}
 
 		return await r.json()
+	}
+
+	async function filter_channels(channels, filter) {
+		let a = []
+		for (let c of (await channels)) {
+			if (filter === null || c.name.indexOf(filter) !== -1)
+			{
+				a.push(c)
+			}
+		}
+		return a
 	}
 
 	async function sorted_channels(channels, sort_by) {
@@ -173,30 +185,36 @@
 				<Graph type="mph_by_hod" data="{s.mph_by_hod}" title="Messages by Hour of Day (UTC)" show_x_axis=true/>
 			</div>
 			<div class="server_channel_list">
-				{#await sorted_channels( get_channels(s.id), sort_channels_by )}
-					<p>...waiting for channels...</p>
-				{:then channel_list}
 					<div class="toolbar">
+						<label>
+							Search:
+							<input type="search" bind:value={channels_search} />
+						</label>
 						Sort by:
 						<div class="sort_menu">
-							<input type=radio bind:group={sort_channels_by} value={"name"} id="sort_name" />
+							<input type=radio bind:group={channels_sort_by} value={"name"} id="sort_name" />
 							<label for="sort_name"> Name </label>
 
-							<input type=radio bind:group={sort_channels_by} value={"last_message"} id="sort_lm" />
+							<input type=radio bind:group={channels_sort_by} value={"last_message"} id="sort_lm" />
 							<label for="sort_lm"> Last message </label>
 
-							<input type=radio bind:group={sort_channels_by} value={"last_mph"} id="sort_mph" />
+							<input type=radio bind:group={channels_sort_by} value={"last_mph"} id="sort_mph" />
 							<label for="sort_mph"> Messages in the last hour </label>
 
-							<input type=radio bind:group={sort_channels_by} value={"total_messages"} id="sort_tm" />
+							<input type=radio bind:group={channels_sort_by} value={"total_messages"} id="sort_tm" />
 							<label for="sort_tm"> Total messages </label>
 						</div>
 
-						<label>
+						<label id="toggle_channel_graphs">
 							<input type=checkbox bind:checked={show_channel_graphs} on:change={toggled_channel_graphs}>
 							Toggle Channel Graphs
 						</label>
+
 					</div>
+
+				{#await sorted_channels( filter_channels( get_channels(s.id), channels_search), channels_sort_by )}
+					<p>...waiting for channels...</p>
+				{:then channel_list}
 					<ul>
 					{#each channel_list as c, i}
 						<li class="channel_item {show_channel_graphs?'show_graphs':''}">
