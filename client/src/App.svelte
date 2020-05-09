@@ -2,6 +2,8 @@
 	import { afterUpdate, onMount } from 'svelte';
 	import Graph from './Graph.svelte';
 
+	let UPDATE_FREQ = 10000;	// 10 seconds
+
 	let server_root = '/'
 	// let server_root = 'http://127.0.0.1:8000/'
 
@@ -91,7 +93,7 @@
 			if (!is_tab_visible()) { return }
 			await update_all_channels()
 			update_channels_loop()
-		}, 1000);
+		}, UPDATE_FREQ);
 	}
 
 	function is_tab_visible() {
@@ -114,6 +116,7 @@
 			console.log("Setting auto-update")
 			update_channels_loop()
 		}
+		// return channels_dict[server_id].slice(0, 10)
 		return channels_dict[server_id]
 	}
 
@@ -165,7 +168,7 @@
 					{s.messages_last_hour} messages in the last hour
 				</div>
 			</div>
-			<div class="server_activity_graphs">
+			<div class="activity_graphs">
 				<Graph type="mph_by_dow" data="{s.mph_by_dow}" title="Messages by Day of Week"/>
 				<Graph type="mph_by_hod" data="{s.mph_by_hod}" title="Messages by Hour of Day (UTC)" show_x_axis=true/>
 			</div>
@@ -217,10 +220,12 @@
 								</div>
 							</div>
 
-							<div class="server_activity_graphs">
+							{#if show_channel_graphs}
+							<div class="activity_graphs">
 								<Graph type="mph_by_dow" data="{c.mph_by_dow}" />
 								<Graph type="mph_by_hod" data="{c.mph_by_hod}" show_x_axis=true/>
 							</div>
+							{/if}
 
 						</li>
 					{/each}
@@ -249,11 +254,8 @@
 .server_activity {
 	grid-area: activity;
 }
-.server_activity_graphs {
+.activity_graphs {
 	grid-area: activity_graphs;
-	display: none;
-}
-.server_item.show_graphs > .server_activity_graphs {
 	display: flex;
 }
 
@@ -329,9 +331,6 @@
 	;
 }
 
-.channel_item.show_graphs > .server_activity_graphs {
-	display: flex;
-}
 
 
 .toolbar {
