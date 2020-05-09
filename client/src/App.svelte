@@ -8,10 +8,8 @@
 	let server_list = []
 	let channels_dict = {}
 
-	let channels_loop_timeout = null;
-	let paused = false;
-
 	let show_channel_graphs = false;
+	let sort_channels_by = "name";
 
 	async function list_servers() {
 		let r = await fetch(server_root+'servers')
@@ -36,30 +34,31 @@
 		return await r.json()
 	}
 
-	function sort_channels(server_id, cmp) {
-		let channels = channels_dict[server_id]
-		channels.sort(cmp);
-		server_list = server_list
+	async function sorted_channels(channels, sort_by) {
+		let sort_func;
+		switch(sort_by) {
+			case 'name':
+				sort_func = function(a, b){return a.name.localeCompare(b.name)}
+				break
+			case 'last_message':
+				sort_func = function(a, b){return new Date(b.last_message.date)-new Date(a.last_message.date)}
+				break
+			case 'last_mph':
+				sort_func = function(a, b){return b.messages_last_hour-a.messages_last_hour}
+				break
+			case 'total_messages':
+				sort_func = function(a, b){return b.total_messages-a.total_messages}
+				break
+			default:
+				console.log("unkown sort value")
+		}
+
+		let c = Array(...await channels)
+		c.sort(sort_func);
+		return c
 	}
 
-	function sort_channels__name(server) {
-		let sort_func = function(a, b){return a.name.localeCompare(b.name)}
-		return sort_channels(server, sort_func)
-	}
-	function sort_channels__messages_last_hour(server) {
-		let sort_func = function(a, b){return b.messages_last_hour-a.messages_last_hour}
-		return sort_channels(server, sort_func)
-	}
-	function sort_channels__last_message(server) {
-		let sort_func = function(a, b){return new Date(b.last_message.date)-new Date(a.last_message.date)}
-		return sort_channels(server, sort_func)
-	}
-	function sort_channels__total_messages(server) {
-		let sort_func = function(a, b){return b.total_messages-a.total_messages}
-		return sort_channels(server, sort_func)
-	}
-	function toggle_channel_graphs() {
-		show_channel_graphs = !show_channel_graphs
+	function toggled_channel_graphs() {
 		if (show_channel_graphs) {
 			update_all_channels()
 		}
@@ -86,25 +85,22 @@
 	}
 
 	function update_channels_loop() {
-		if (paused) {
-			return
-		}
+			if (!is_tab_visible()) { return }
 
-		channels_loop_timeout = setTimeout(async () => {
+		setTimeout(async () => {
+			if (!is_tab_visible()) { return }
 			await update_all_channels()
 			update_channels_loop()
 		}, 1000);
 	}
 
+	function is_tab_visible() {
+		return document.visibilityState === 'visible'
+	}
+
 	function handleVisibilityChange() {
-		if (document.visibilityState === 'visible') {
-			console.log("resumed")
-			paused = false
+		if (is_tab_visible()) {
 			update_channels_loop()
-		} else {
-			paused = true
-			clearTimeout(channels_loop_timeout)
-			console.log("paused")
 		}
 	}
 
@@ -116,8 +112,7 @@
 			channels_dict[server_id] = channels
 
 			console.log("Setting auto-update")
-			paused = false
-			// update_channels_loop()
+			update_channels_loop()
 		}
 		return channels_dict[server_id]
 	}
@@ -175,26 +170,29 @@
 				<Graph type="mph_by_hod" data="{s.mph_by_hod}" title="Messages by Hour of Day (UTC)" show_x_axis=true/>
 			</div>
 			<div class="server_channel_list">
-				{#await get_channels(s.id)}
+				{#await sorted_channels( get_channels(s.id), sort_channels_by )}
 					<p>...waiting for channels...</p>
 				{:then channel_list}
-					<div class="sort_menu">
+					<div class="toolbar">
 						Sort by:
-						<button on:click={() => sort_channels__name(s.id)}>
-							Name
-						</button>
-						<button on:click={() => sort_channels__last_message(s.id)}>
-							Last message
-						</button>
-						<button on:click={() => sort_channels__messages_last_hour(s.id)}>
-							Messages in the last hour
-						</button>
-						<button on:click={() => sort_channels__total_messages(s.id)}>
-							Total messages
-						</button>
-						<button on:click={() => toggle_channel_graphs()}>
+						<div class="sort_menu">
+							<input type=radio bind:group={sort_channels_by} value={"name"} id="sort_name" />
+							<label for="sort_name"> Name </label>
+
+							<input type=radio bind:group={sort_channels_by} value={"last_message"} id="sort_lm" />
+							<label for="sort_lm"> Last message </label>
+
+							<input type=radio bind:group={sort_channels_by} value={"last_mph"} id="sort_mph" />
+							<label for="sort_mph"> Messages in the last hour </label>
+
+							<input type=radio bind:group={sort_channels_by} value={"total_messages"} id="sort_tm" />
+							<label for="sort_tm"> Total messages </label>
+						</div>
+
+						<label>
+							<input type=checkbox bind:checked={show_channel_graphs} on:change={toggled_channel_graphs}>
 							Toggle Channel Graphs
-						</button>
+						</label>
 					</div>
 					<ul>
 					{#each channel_list as c, i}
@@ -336,10 +334,36 @@
 }
 
 
-.sort_menu {
+.toolbar {
 	margin-top: 40px;
+	margin-bottom: 10px;
 }
 
+.sort_menu input[type="radio"] {
+  opacity: 0;
+  position: fixed;
+  width: 0;
+}
+.sort_menu label {
+    display: inline-block;
+    background-color: #ddd;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 8px;
+}
+.sort_menu input[type="radio"]:checked + label {
+    background-color:#bfb;
+    border-color: #4c4;
+}
+.sort_menu input[type="radio"]:focus + label {
+  background-color: #cfc;
+}
+.sort_menu label:hover {
+  background-color: #dfd;
+}
+.toolbar > * {
+	display: inline-block;
+}
 
 
 
