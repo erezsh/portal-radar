@@ -107,6 +107,8 @@ def update_stats():
         """)
         cursor.execute(q)
 
+    print("done")
+
 
 def get_server_mph_by_dow(server):
     "Get messages-per-hour by day-of-week"

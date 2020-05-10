@@ -85,12 +85,12 @@ def get_all_channels_and_users(cli):
         for m in tqdm(g.members):
             member = get_member(m)
 
-async def get_all_messages(cli):
+async def get_all_messages(cli, limit=100):
     print("Getting all message history")
     for g in cli.guilds:
         for c in tqdm(g.text_channels):
             try:
-                messages = await c.history().flatten()
+                messages = await c.history(limit=limit).flatten()
             except discord.errors.Forbidden:
                 continue
 
@@ -114,6 +114,18 @@ def print_db_stats():
     print('%d items in message-grid' % MessageGrid.objects.count() )
 
 
+class DebugClient(discord.Client):
+    async def on_ready(self):
+        breakpoint()
+
+class BuildDbClient(discord.Client):
+    async def on_ready(self):
+        print('Building full_db')
+        await get_all_channels_and_users(self)
+        await get_all_messages(self, limit=None)
+        await print_db_stats()
+
+
 class MyClient(discord.Client):
     async def on_ready(self):
         print('Logged in as')
@@ -122,7 +134,6 @@ class MyClient(discord.Client):
 
         await get_all_channels_and_users(self)
         await get_all_messages(self)
-
         await print_db_stats()
 
 
@@ -145,6 +156,14 @@ class MyClient(discord.Client):
 
 def run():
     client = MyClient()
+    client.run(DISCORD_TOKEN)
+
+def build_db():
+    client = BuildDbClient()
+    client.run(DISCORD_TOKEN)
+
+def debug():
+    client = DebugClient()
     client.run(DISCORD_TOKEN)
 
 if __name__ == '__main__':
