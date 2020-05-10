@@ -46,6 +46,10 @@ def cache(timeout, call_with_last_value=False):
 def get_channel_messages_last_hour(channel):
     return Message.objects.filter(channel=channel, created_at__gte=arrow.utcnow().shift(hours=-1).datetime).count(),
 
+@cache(300)
+def get_channel_messages_last_week(channel):
+    return Message.objects.filter(channel=channel, created_at__gte=arrow.utcnow().shift(weeks=-1).datetime).count(),
+
 @cache(30)
 def get_channel_total_messages(channel):
     return Message.objects.filter(channel=channel).count()

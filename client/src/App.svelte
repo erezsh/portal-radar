@@ -60,6 +60,9 @@
 			case 'last_mph':
 				sort_func = function(a, b){return b.messages_last_hour-a.messages_last_hour}
 				break
+			case 'last_mpw':
+				sort_func = function(a, b){return b.messages_last_week-a.messages_last_week}
+				break
 			case 'total_messages':
 				sort_func = function(a, b){return b.total_messages-a.total_messages}
 				break
@@ -201,6 +204,9 @@
 							<input type=radio bind:group={channels_sort_by} value={"last_mph"} id="sort_mph" />
 							<label for="sort_mph"> Messages in the last hour </label>
 
+							<input type=radio bind:group={channels_sort_by} value={"last_mpw"} id="sort_mpw" />
+							<label for="sort_mpw"> Last week </label>
+
 							<input type=radio bind:group={channels_sort_by} value={"total_messages"} id="sort_tm" />
 							<label for="sort_tm"> Total messages </label>
 						</div>
@@ -229,7 +235,11 @@
 									{c.total_messages} messages
 								</div>
 								<div>
-									{c.messages_last_hour} in the last hour
+									{#if c.messages_last_week>0}
+									{c.messages_last_hour} last hour
+									|
+									{/if}
+									{c.messages_last_week} last week
 								</div>
 								<div>
 									<time datetime="{c.last_message.date}">

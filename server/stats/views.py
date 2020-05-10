@@ -71,6 +71,7 @@ def channel_stats(channel, graph_info):
         'total_messages': total_messages,
 
         'messages_last_hour': db_funcs.get_channel_messages_last_hour(channel),
+        'messages_last_week': db_funcs.get_channel_messages_last_week(channel),
         'last_message': output_date(last_message),
     }
 
