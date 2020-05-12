@@ -4,6 +4,8 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "conf.settings")
 django.setup()
 
+import sys
+
 from stats.models import User, Channel, Server, Member, Message, MessageGrid
 from conf.settings import DISCORD_TOKEN
 
@@ -23,7 +25,11 @@ def get_server(disc_guild):
 def get_user(disc_user):
     user, _ = User.objects.get_or_create(
             disc_id=str(disc_user.id),
-            defaults={ 'name': disc_user.name }
+            defaults={
+                'name': disc_user.name,
+                'bot': disc_user.bot,
+                'created_at': import_date(disc_user.created_at),
+            }
         )
     return user
 
@@ -33,6 +39,22 @@ def get_channel(disc_channel, server):
             defaults={ 'name': disc_channel.name, 'server': server }
         )
     return channel
+
+def update_channel(disc_channel, server):
+    channel = get_channel(disc_channel, server)
+    channel.type = disc_channel.type.name
+    channel.name = disc_channel.name
+    if channel.type == 'text':
+        channel.desc = disc_channel.topic or ''
+    channel.save()
+        # category = String(null=True)
+
+def update_user(disc_user):
+    user = get_user(disc_user)
+    user.name = disc_user.name
+    user.bot = disc_user.bot
+    user.created_at = import_date(disc_user.created_at)
+    user.save()
 
 
 import arrow
@@ -49,6 +71,8 @@ def get_message(message):
             disc_id=str(message.id),
             author = get_user(message.author),
             channel = get_channel(message.channel, server),
+            text = message.content,
+            reactions = sum([r.count for r in message.reactions]),
             created_at = import_date(message.created_at),
         )
         m.save()
@@ -65,8 +89,14 @@ def get_member(member):
     return m
 
 @sync_to_async
-def new_message(m):
-    return get_message(m)
+def new_message(disc_m, update=False):
+    m = get_message(disc_m)
+    if update:
+        m.text = disc_m.content
+        m.reactions = sum([r.count for r in disc_m.reactions])
+        m.save()
+
+    return m
 
 @sync_to_async
 def new_member(m):
@@ -85,8 +115,8 @@ def get_all_channels_and_users(cli):
         for m in tqdm(g.members):
             member = get_member(m)
 
-async def get_all_messages(cli, limit=100):
-    print("Getting all message history")
+async def get_all_messages(cli, limit=100, update=False):
+    print(f"Getting all message history (limit={limit})")
     for g in cli.guilds:
         for c in tqdm(g.text_channels):
             try:
@@ -95,19 +125,42 @@ async def get_all_messages(cli, limit=100):
                 continue
 
             for m in messages:
-                await new_message(m)
+                await new_message(m, update)
 
 
 
+@sync_to_async
+def update_all_channels_and_users(cli):
+    print("Updating channels")
+    for g in cli.guilds:
+        server = get_server(g)
+        for c in tqdm(g.channels):
+            update_channel(c, server)
+
+    print("Updating members")
+    for g in cli.guilds:
+        for m in tqdm(g.members):
+            update_user(m)
 
 
 
 from stats.db_funcs import update_stats
 
 @sync_to_async
-def print_db_stats():
+def update_db_stats():
     print("Updating stats")
     update_stats()
+
+@sync_to_async
+def channel_update_voice_count(channel):
+    server = get_server(channel.guild)
+    ch = get_channel(channel, server)
+    ch.voice_users_online_count = len(channel.members)
+    ch.save()
+
+
+@sync_to_async
+def print_db_stats():
     print('%d channels' % Channel.objects.count())
     print('%d members' % Member.objects.count())
     print('%d messages' % Message.objects.count())
@@ -121,8 +174,10 @@ class DebugClient(discord.Client):
 class BuildDbClient(discord.Client):
     async def on_ready(self):
         print('Building full_db')
-        await get_all_channels_and_users(self)
-        await get_all_messages(self, limit=None)
+        # await get_all_channels_and_users(self)
+        await update_all_channels_and_users(self)
+        await get_all_messages(self, limit=None, update=True)
+        await update_db_stats()
         await print_db_stats()
 
 
@@ -134,8 +189,8 @@ class MyClient(discord.Client):
 
         await get_all_channels_and_users(self)
         await get_all_messages(self)
+        await update_db_stats()
         await print_db_stats()
-
 
 
     async def on_member_join(self, member):
@@ -144,12 +199,17 @@ class MyClient(discord.Client):
         print(await new_member(member))
 
 
-
     async def on_message(self, message):
         print(f"New message in {message.channel.name} by {message.author.name} (bot={message.author.bot})")
         print(message.content)
 
         print( await new_message(message) )
+
+
+    async def on_voice_state_update(self, member, before, after):
+        await channel_update_voice_count(before.channel)
+        await channel_update_voice_count(after.channel)
+
 
 
 
@@ -166,5 +226,13 @@ def debug():
     client = DebugClient()
     client.run(DISCORD_TOKEN)
 
+def main(args):
+    cmd ,= args
+    f = {
+        'run': run,
+        'build_db': build_db,
+        'debug': debug,
+    }[cmd]()
+
 if __name__ == '__main__':
-    run()
+    main(sys.argv[1:])

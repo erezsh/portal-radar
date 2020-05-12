@@ -63,6 +63,9 @@
 			case 'last_mpw':
 				sort_func = function(a, b){return b.messages_last_week-a.messages_last_week}
 				break
+			case 'active_voices':
+				sort_func = function(a, b){return (b.type=='voice')-(a.type=='voice') || b.voice_users_online_count-a.voice_users_online_count}
+				break
 			case 'total_messages':
 				sort_func = function(a, b){return b.total_messages-a.total_messages}
 				break
@@ -91,6 +94,7 @@
 			c.messages_last_hour = new_c.messages_last_hour
 			c.mph_by_hod = new_c.mph_by_hod
 			c.mph_by_dow = new_c.mph_by_dow
+			c.voice_users_online_count = new_c.voice_users_online_count
 		}
 		server_list = server_list
 	}
@@ -207,6 +211,9 @@
 							<input type=radio bind:group={channels_sort_by} value={"last_mpw"} id="sort_mpw" />
 							<label for="sort_mpw"> Last week </label>
 
+							<input type=radio bind:group={channels_sort_by} value={"active_voices"} id="sort_active_voices" />
+							<label for="sort_active_voices"> Active in Voice</label>
+
 							<input type=radio bind:group={channels_sort_by} value={"total_messages"} id="sort_tm" />
 							<label for="sort_tm"> Total messages </label>
 						</div>
@@ -230,6 +237,7 @@
 								</a>
 							</div>
 
+							{#if c.type == 'text'}
 							<div class="channel_stats">
 								<div>
 									{c.total_messages} messages
@@ -247,6 +255,25 @@
 									</time>
 								</div>
 							</div>
+							{:else if c.type == 'voice'}
+								<div class="channel_stats">
+									<div>
+										Voice
+									</div>
+									<div>
+									...
+									</div>
+									<div>
+										{c.voice_users_online_count} active in voice
+									</div>
+								</div>
+							{:else}
+								<div class="channel_stats">
+									<div>
+										{c.type}
+									</div>
+								</div>
+							{/if}
 
 							{#if show_channel_graphs}
 							<div class="activity_graphs">

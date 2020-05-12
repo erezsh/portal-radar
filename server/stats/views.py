@@ -57,25 +57,32 @@ def channel_stats(channel, graph_info):
 	messages-per-hour , for each hour of the day (24 values)
     """
 
-    last_message = db_funcs.get_channel_last_message(channel)   # Keep this first, it refreshes the cache
-    if last_message is None:
-        return None
+    if channel.type == 'voice':
+        last_message = None
+        total_messages = None
+    else:
+        last_message = db_funcs.get_channel_last_message(channel)   # Keep this first, it refreshes the cache
+        if last_message is None:
+            return None
 
-    total_messages = db_funcs.get_channel_total_messages(channel)
-    if total_messages <= 1:
-        return None
+        total_messages = db_funcs.get_channel_total_messages(channel)
+
+        if total_messages <= 1:
+            return None
 
     json = {
         'id': str(channel.disc_id),
+        'type': channel.type or 'text',
         'name': channel.name,
         'total_messages': total_messages,
 
         'messages_last_hour': db_funcs.get_channel_messages_last_hour(channel),
         'messages_last_week': db_funcs.get_channel_messages_last_week(channel),
         'last_message': output_date(last_message),
+        'voice_users_online_count': channel.voice_users_online_count,
     }
 
-    if graph_info:
+    if graph_info and channel.type != 'voice':
         json.update({
             'mph_by_dow': db_funcs.get_channel_mph_by_dow(channel),
             'mph_by_hod': db_funcs.get_channel_mph_by_hod(channel),

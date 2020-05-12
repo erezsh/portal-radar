@@ -37,6 +37,8 @@ M2M = apply_kw_with_defaults(models.ManyToManyField, blank=True)
 class User(Model):
     disc_id = String(primary_key=True)
     name = String()
+    bot = Bool(null=True)
+    created_at = Date(null=True)
 
 class Server(Model):
     "Aka guild"
@@ -51,12 +53,19 @@ class Channel(Model):
     server = ForeignKey(Server, related_name='channels')
 
     name = String()
+    type = String(null=True)
+    desc = Text()
+    category = String(null=True)
+    voice_users_online_count = Int0()
 
 class Message(Model):
     disc_id = String(primary_key=True)
     author = ForeignKey(User, related_name='messages')
     channel = ForeignKey(Channel, related_name='messages')
     created_at = Date()
+
+    text = Text()
+    reactions = Int(null=True)
 
 class Member(Model):
     user = ForeignKey(User)
