@@ -152,6 +152,14 @@ def update_db_stats():
     update_stats()
 
 @sync_to_async
+def channel_update_voice_count(channel):
+    server = get_server(channel.guild)
+    ch = get_channel(channel, server)
+    ch.voice_users_online_count = len(channel.members)
+    ch.save()
+
+
+@sync_to_async
 def print_db_stats():
     print('%d channels' % Channel.objects.count())
     print('%d members' % Member.objects.count())
@@ -179,11 +187,10 @@ class MyClient(discord.Client):
         print(self.user.name)
         print(self.user.id)
 
-        # await get_all_channels_and_users(self)
+        await get_all_channels_and_users(self)
         await get_all_messages(self)
         await update_db_stats()
         await print_db_stats()
-
 
 
     async def on_member_join(self, member):
@@ -192,12 +199,17 @@ class MyClient(discord.Client):
         print(await new_member(member))
 
 
-
     async def on_message(self, message):
         print(f"New message in {message.channel.name} by {message.author.name} (bot={message.author.bot})")
         print(message.content)
 
         print( await new_message(message) )
+
+
+    async def on_voice_state_update(self, member, before, after):
+        await channel_update_voice_count(before.channel)
+        await channel_update_voice_count(after.channel)
+
 
 
 

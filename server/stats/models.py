@@ -56,6 +56,7 @@ class Channel(Model):
     type = String(null=True)
     desc = Text()
     category = String(null=True)
+    voice_users_online_count = Int0()
 
 class Message(Model):
     disc_id = String(primary_key=True)
