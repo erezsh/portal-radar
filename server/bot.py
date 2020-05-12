@@ -25,7 +25,11 @@ def get_server(disc_guild):
 def get_user(disc_user):
     user, _ = User.objects.get_or_create(
             disc_id=str(disc_user.id),
-            defaults={ 'name': disc_user.name }
+            defaults={
+                'name': disc_user.name,
+                'bot': disc_user.bot,
+                'created_at': import_date(disc_user.created_at),
+            }
         )
     return user
 
@@ -67,6 +71,8 @@ def get_message(message):
             disc_id=str(message.id),
             author = get_user(message.author),
             channel = get_channel(message.channel, server),
+            text = message.content,
+            reactions = sum([r.count for r in message.reactions]),
             created_at = import_date(message.created_at),
         )
         m.save()
@@ -110,7 +116,7 @@ def get_all_channels_and_users(cli):
             member = get_member(m)
 
 async def get_all_messages(cli, limit=100, update=False):
-    print("Getting all message history")
+    print(f"Getting all message history (limit={limit})")
     for g in cli.guilds:
         for c in tqdm(g.text_channels):
             try:
