@@ -1,6 +1,7 @@
 <script>
-	import { afterUpdate, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import Graph from './Graph.svelte';
+	import Server from './Server.svelte';
 
 	let UPDATE_FREQ = 10000;	// 10 seconds
 
@@ -150,242 +151,48 @@
 
 <main>
 	<h1>Portal Radar</h1>
+
+	<div class="toolbar">
+		<label>
+			Search:
+			<input type="search" bind:value={channels_search} />
+		</label>
+		Sort by:
+		<div class="sort_menu">
+			<input type=radio bind:group={channels_sort_by} value={"name"} id="sort_name" />
+			<label for="sort_name"> Name </label>
+
+			<input type=radio bind:group={channels_sort_by} value={"last_message"} id="sort_lm" />
+			<label for="sort_lm"> Last message </label>
+
+			<input type=radio bind:group={channels_sort_by} value={"last_mph"} id="sort_mph" />
+			<label for="sort_mph"> Messages in the last hour </label>
+
+			<input type=radio bind:group={channels_sort_by} value={"last_mpw"} id="sort_mpw" />
+			<label for="sort_mpw"> Last week </label>
+
+			<input type=radio bind:group={channels_sort_by} value={"active_voices"} id="sort_active_voices" />
+			<label for="sort_active_voices"> Active in Voice</label>
+
+			<input type=radio bind:group={channels_sort_by} value={"total_messages"} id="sort_tm" />
+			<label for="sort_tm"> Total messages </label>
+		</div>
+
+		<label id="toggle_channel_graphs">
+			<input type=checkbox bind:checked={show_channel_graphs} on:change={toggled_channel_graphs}>
+			Toggle Channel Graphs
+		</label>
+
+	</div>
+
 	<ul class="server_list">
 	{#each server_list as s, i}
-		<li class="server_item show_graphs">
-			<div class="server_name">
-				{s.name}
-			</div>
-			<div class="server_stats">
-				<div>
-					{s.total_members} members
-				</div>
-				<div>
-					{s.channel_count} channels
-				</div>
-				<div>
-					{s.total_messages} messages
-				</div>
-			</div>
-			<div class="server_growth">
-				<b>Member Growth</b>
-				<div>
-					+{s.members_joined_last_24h} in the last day
-				</div>
-				<div>
-					+{s.members_joined_per_day_avg.toFixed(2)} every day (avg)
-				</div>
-			</div>
-			<div class="server_activity">
-				<div>
-					<b>Activity</b>
-				</div>
-				<time datetime="{s.last_message.date}">
-				Last message: {s.last_message.date_text}
-				</time>
-				<div>
-					{s.messages_last_hour} messages in the last hour
-				</div>
-			</div>
-			<div class="activity_graphs">
-				<Graph type="mph_by_dow" data="{s.mph_by_dow}" title="Messages by Day of Week"/>
-				<Graph type="mph_by_hod" data="{s.mph_by_hod}" title="Messages by Hour of Day (UTC)" show_x_axis=true/>
-			</div>
-			<div class="server_channel_list">
-					<div class="toolbar">
-						<label>
-							Search:
-							<input type="search" bind:value={channels_search} />
-						</label>
-						Sort by:
-						<div class="sort_menu">
-							<input type=radio bind:group={channels_sort_by} value={"name"} id="sort_name" />
-							<label for="sort_name"> Name </label>
-
-							<input type=radio bind:group={channels_sort_by} value={"last_message"} id="sort_lm" />
-							<label for="sort_lm"> Last message </label>
-
-							<input type=radio bind:group={channels_sort_by} value={"last_mph"} id="sort_mph" />
-							<label for="sort_mph"> Messages in the last hour </label>
-
-							<input type=radio bind:group={channels_sort_by} value={"last_mpw"} id="sort_mpw" />
-							<label for="sort_mpw"> Last week </label>
-
-							<input type=radio bind:group={channels_sort_by} value={"active_voices"} id="sort_active_voices" />
-							<label for="sort_active_voices"> Active in Voice</label>
-
-							<input type=radio bind:group={channels_sort_by} value={"total_messages"} id="sort_tm" />
-							<label for="sort_tm"> Total messages </label>
-						</div>
-
-						<label id="toggle_channel_graphs">
-							<input type=checkbox bind:checked={show_channel_graphs} on:change={toggled_channel_graphs}>
-							Toggle Channel Graphs
-						</label>
-
-					</div>
-
-				{#await sorted_channels( filter_channels( get_channels(s.id), channels_search), channels_sort_by )}
-					<p>...waiting for channels...</p>
-				{:then channel_list}
-					<ul>
-					{#each channel_list as c, i}
-						<li class="channel_item {show_channel_graphs?'show_graphs':''}">
-							<div class="channel_name">
-								<a href="https://discord.com/channels/{s.id}/{c.id}" target="_blank">
-									{c.name}
-								</a>
-							</div>
-
-							{#if c.type == 'text'}
-							<div class="channel_stats">
-								<div>
-									{c.total_messages} messages
-								</div>
-								<div>
-									{#if c.messages_last_week>0}
-									{c.messages_last_hour} last hour
-									|
-									{/if}
-									{c.messages_last_week} last week
-								</div>
-								<div>
-									<time datetime="{c.last_message.date}">
-									Last message: {c.last_message.date_text}
-									</time>
-								</div>
-							</div>
-							{:else if c.type == 'voice'}
-								<div class="channel_stats">
-									<div>
-										Voice
-									</div>
-									<div>
-									...
-									</div>
-									<div>
-										{c.voice_users_online_count} active in voice
-									</div>
-								</div>
-							{:else}
-								<div class="channel_stats">
-									<div>
-										{c.type}
-									</div>
-								</div>
-							{/if}
-
-							{#if show_channel_graphs}
-							<div class="activity_graphs">
-								<Graph type="mph_by_dow" data="{c.mph_by_dow}" />
-								<Graph type="mph_by_hod" data="{c.mph_by_hod}" show_x_axis=true/>
-							</div>
-							{/if}
-
-						</li>
-					{/each}
-					</ul>
-				{:catch error}
-					Error loading channels
-				{/await}
-			</div>
-		</li>
+		<Server {s} {channels_sort_by} {channels_search} {show_channel_graphs} channels={sorted_channels( filter_channels( get_channels(s.id), channels_search), channels_sort_by )} />
 	{/each}
 	</ul>
 </main>
 
 <style>
-.server_name {
-	grid-area: server;
-	font-weight: bold;
-	font-size: 20px;
-}
-.server_stats {
-	grid-area: stats;
-}
-.server_growth {
-	grid-area: growth;
-}
-.server_activity {
-	grid-area: activity;
-}
-.activity_graphs {
-	grid-area: activity_graphs;
-	display: flex;
-}
-
-.server_channel_list {
-	grid-area: channels
-}
-
-.mph_by_dow {
-	width: 400px;
-	margin: auto;
-}
-.mph_by_hod {
-	width: 400px;
-	margin: auto;
-}
-
-.server_item {
-	display: grid;
-	grid-template-columns: 200px 200px auto;
-
-	grid-template-areas:
-		"server growth   activity_graphs"
-		"stats  activity activity_graphs"
-		"channels channels channels";
-
-	padding: 10px;
-	border-top: 3px solid silver;
-}
-
-.channel_name {
-	grid-area: name;
-	font-weight: bold;
-	font-size: 18px;
-}
-
-.channel_stats {
-	grid-area: stats;
-}
-
-.channel_item {
-	float: left;
-	margin-right: 10px;
-	margin-bottom: 10px;
-
-	display: grid;
-
-	grid-template-columns: 300px;
-
-	grid-template-areas:
-		"name"
-		"stats"
-	;
-
-	margin-top: 10px;
-	padding: 10px;
-	background: #eee;
-	border-bottom: 1px solid silver;
-	max-width: 1200px
-
-}
-
-.channel_item.show_graphs {
-	float: none;
-	margin-right: 0;
-	margin-bottom: 0;
-
-	grid-template-columns: 60px 300px 800px;
-
-	grid-template-areas:
-		"blank name   activity_graphs"
-		"blank stats  activity_graphs"
-	;
-}
-
-
 
 .toolbar {
 	margin-top: 40px;

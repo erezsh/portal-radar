@@ -90,3 +90,16 @@
         <div class="graph {type}" bind:this={data_elem} data-series="{JSON.stringify(Object.entries(data))}"></div>
 	</slot>
 </div>
+
+
+<style>
+.mph_by_dow {
+	width: 400px;
+	margin: auto;
+}
+.mph_by_hod {
+	width: 400px;
+	margin: auto;
+}
+
+</style>
