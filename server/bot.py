@@ -118,10 +118,13 @@ def get_all_channels_and_users(cli):
 async def get_all_messages(cli, limit=100, update=False):
     print(f"Getting all message history (limit={limit})")
     for g in cli.guilds:
+        print('*', g)
         for c in tqdm(g.text_channels):
             try:
                 messages = await c.history(limit=limit).flatten()
             except discord.errors.Forbidden:
+                continue
+            except discord.errors.NotFound:
                 continue
 
             for m in messages:
@@ -133,14 +136,17 @@ async def get_all_messages(cli, limit=100, update=False):
 def update_all_channels_and_users(cli):
     print("Updating channels")
     for g in cli.guilds:
+        print('*', g)
         server = get_server(g)
         for c in tqdm(g.channels):
             update_channel(c, server)
 
     print("Updating members")
     for g in cli.guilds:
+        print('*', g)
         for m in tqdm(g.members):
             update_user(m)
+            get_member(m)
 
 
 

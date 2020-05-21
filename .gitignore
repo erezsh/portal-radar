@@ -5,3 +5,4 @@ migrations
 /client/node_modules/
 /client/public/build/
 __pycache__
+node_modules
