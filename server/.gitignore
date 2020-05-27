@@ -1,0 +1,4 @@
+.env
+.idea
+static
+local_settings.py

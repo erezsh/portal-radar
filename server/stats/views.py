@@ -96,6 +96,7 @@ def servers(request):
     servers = Server.objects.all()
     return {s.disc_id: server_stats(s) for s in servers}
 
+
 @routes.get('channels/<server_id>/')
 def channels(request, server_id, graph_info=False):
     server = Server.objects.get(disc_id=server_id)
@@ -103,6 +104,20 @@ def channels(request, server_id, graph_info=False):
 
     stats = [channel_stats(c, graph_info) for c in channels]
     return {c['id']: c for c in stats if c}
+
+
+@routes.get('users/<user_id>/messages')
+def user_messages(request, user_id):
+    messages = Message.objects.filter(author__disc_id=user_id)
+    return {
+        message.disc_id: {
+            'text': message.text,
+            'channel': message.channel.name,
+            'channel_id': message.channel.disc_id,
+            'server': message.channel.server.name,
+            'server_id': message.channel.server.disc_id
+        } for message in messages
+    }
 
 
 @routes.get('/')
