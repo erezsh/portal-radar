@@ -127,8 +127,3 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 
 DISCORD_TOKEN = None
-
-try:
-    from .local_settings import *
-except:
-    pass
