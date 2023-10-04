@@ -1,3 +1,5 @@
+(This is an old project, it's out-of-date, and will probably never be resumed)
+
 # Portal Radar Project
 
 Courtesy of the Coffeehouse.
@@ -6,7 +8,5 @@ Courtesy of the Coffeehouse.
 * Client - written in Svelte
 
 Look inside `server/` and `client/` for more information.
-
-[Live demo](http://portal-radar.erezsh.com/)
 
 ![Screenshot](screenshot_latest.jpg "Screenshot")
